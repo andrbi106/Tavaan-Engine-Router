@@ -233,67 +233,107 @@ final class RouterServiceProvider
     public function getRouter(): Router { if ($this->router === null) $this->register(); return $this->router; }
 
     /**
-     * action
+     * action — build a URL for a controller@method action.
      */
-    public function action(string $action, array $params = [])
+    public function action(string $action, array $params = []): string
     {
-        return null;
+        // Convert "Controller@index" to "/controller/index"
+        [$controller, $method] = explode('@', $action, 2) + ['', 'index'];
+        $path = '/' . strtolower(str_replace('Controller', '', $controller));
+        if ($method !== '' && $method !== 'index') {
+            $path .= '/' . $method;
+        }
+        foreach ($params as $k => $v) {
+            $path .= '/' . (string) $v;
+        }
+        return $path;
     }
     /**
-     * asset
+     * asset — build a URL for a static asset.
      */
-    public function asset(string $path, bool $secure = null)
+    public function asset(string $path, ?bool $secure = null): string
     {
-        return null;
+        $scheme = $secure === null ? '' : ($secure ? 'https' : 'http');
+        $prefix = $scheme !== '' ? $scheme . '://' : '';
+        return $prefix . '/' . ltrim($path, '/');
     }
     /**
-     * current
+     * current — return the current request URI.
      */
-    public function current()
+    public function current(): string
     {
-        return null;
+        return $_SERVER['REQUEST_URI'] ?? '/';
     }
     /**
-     * full
+     * full — return the full URL with query string.
      */
-    public function full()
+    public function full(): string
     {
-        return null;
+        $uri = $_SERVER['REQUEST_URI'] ?? '/';
+        $qs = $_SERVER['QUERY_STRING'] ?? '';
+        if ($qs !== '' && !str_contains($uri, '?')) {
+            $uri .= '?' . $qs;
+        }
+        return $uri;
     }
     /**
      * isValidSignature
      */
     public function isValidSignature(string $url): bool
     {
-        return true;
+        $parts = parse_url($url);
+        if (!isset($parts['query'])) { return false; }
+        parse_str($parts['query'], $params);
+        $signature = $params['signature'] ?? '';
+        if ($signature === '') { return false; }
+        unset($params['signature']);
+        $path = $parts['path'] ?? '/';
+        $expected = $this->generateSignature($path, $params);
+        return hash_equals($expected, $signature);
     }
     /**
-     * previous
+     * previous — return the referer or fallback URL.
      */
-    public function previous(?string $fallback = null)
+    public function previous(?string $fallback = null): string
     {
-        return null;
+        return $_SERVER['HTTP_REFERER'] ?? $fallback ?? '/';
     }
     /**
-     * signed
+     * signed — build a signed URL with optional expiry.
      */
-    public function signed(string $path, ?int $expiration = null)
+    public function signed(string $path, ?int $expiration = null): string
     {
-        return null;
+        $params = [];
+        if ($expiration !== null) {
+            $params['expires'] = $expiration;
+        }
+        $signature = $this->generateSignature($path, $params);
+        $params['signature'] = $signature;
+        $query = http_build_query($params);
+        return $path . (str_contains($path, '?') ? '&' : '?') . $query;
     }
     /**
-     * temporarySignedRoute
+     * temporarySignedRoute — build a signed named route URL with expiry.
      */
-    public function temporarySignedRoute(string $name, int $expiration, array $params = [])
+    public function temporarySignedRoute(string $name, int $expiration, array $params = []): string
     {
-        return null;
+        $path = $this->getRouter()->url($name, $params) ?? $name;
+        $params['expires'] = $expiration;
+        $signature = $this->generateSignature($path, $params);
+        $params['signature'] = $signature;
+        return $path . '?' . http_build_query($params);
     }
     /**
-     * to
+     * to — build a URL for a path with query params.
      */
-    public function to(string $path, array $params = [], bool $secure = null)
+    public function to(string $path, array $params = [], ?bool $secure = null): string
     {
-        return null;
+        $scheme = $secure === null ? '' : ($secure ? 'https' : 'http');
+        $prefix = $scheme !== '' ? $scheme . '://' : '';
+        if ($params !== []) {
+            $path .= (str_contains($path, '?') ? '&' : '?') . http_build_query($params);
+        }
+        return $prefix . '/' . ltrim($path, '/');
     }
 
     /**
@@ -304,11 +344,15 @@ final class RouterServiceProvider
         return $this;
     }
     /**
-     * currentRouteName
+     * currentRouteName — name of the matched route (or null).
      */
-    public function currentRouteName()
+    public function currentRouteName(): ?string
     {
-        return null;
+        $uri = $_SERVER['REQUEST_URI'] ?? '/';
+        $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+        $dispatch = $this->getRouter()->dispatch($method, $uri);
+        if ($dispatch === null) { return null; }
+        return $dispatch['route']->name ?: null;
     }
     /**
      * domain
@@ -332,32 +376,53 @@ final class RouterServiceProvider
         return $this->routes->getRoute($key) !== null;
     }
     /**
-     * head
+     * head — register a HEAD route.
      */
-    public function head(string $uri)
+    public function head(string $uri, mixed $action = null): ?Route
     {
-        return null;
+        if ($action === null) { return null; }
+        $router = $this->getRouter();
+        if (method_exists($router, 'addRoute')) {
+            return $router->addRoute('HEAD', $uri, $action);
+        }
+        // fall back to adding a route via get() (GET/HEAD equivalent in some routers)
+        return $router->get($uri, $action);
+    }
+    /** @var array<string, callable> */
+    private array $bindings = [];
+
+    /**
+     * model — bind a route param to a model resolver.
+     */
+    public function model(string $key, callable $resolver): self
+    {
+        $this->bindings[$key] = $resolver;
+        return $this;
+    }
+
+    public function getBindings(): array
+    {
+        return $this->bindings;
     }
     /**
-     * model
+     * options — register an OPTIONS route.
      */
-    public function model()
+    public function options(string $uri, mixed $action = null): ?Route
     {
-        return null;
+        if ($action === null) { return null; }
+        $router = $this->getRouter();
+        return method_exists($router, 'addRoute') ? $router->addRoute('OPTIONS', $uri, $action) : $router->any($uri, $action);
     }
     /**
-     * options
+     * permanentRedirect — register a 301 redirect route.
      */
-    public function options()
+    public function permanentRedirect(string $from, string $to): self
     {
-        return null;
-    }
-    /**
-     * permanentRedirect
-     */
-    public function permanentRedirect()
-    {
-        return null;
+        $this->getRouter()->get($from, function () use ($to) {
+            header('Location: ' . $to, true, 301);
+            exit;
+        });
+        return $this;
     }
     /**
      * prefix
@@ -374,12 +439,18 @@ final class RouterServiceProvider
         return $this;
     }
     /**
-     * view
+     * view — register a route that just renders a view template.
      */
-    public function view()
+    public function view(string $uri, string $template, array $data = []): Route
     {
-        return null;
-    
+        return $this->getRouter()->get($uri, function () use ($template, $data) {
+            // Delegate to the View engine when present; basic echo for now.
+            $out = '<!-- view: ' . htmlspecialchars($template) . ' -->';
+            foreach ($data as $k => $v) {
+                $out .= '<!-- ' . htmlspecialchars($k) . ' -->';
+            }
+            return $out;
+        });
     }
 }
 
