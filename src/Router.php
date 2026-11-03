@@ -1,248 +1,219 @@
 <?php
-
 declare(strict_types=1);
-
 namespace Tavaan\Engine\Http\Routing;
 
-use Tavaan\Core\Contracts\Config\RepositoryInterface as Config;
-
-/**
- * Router — پیاده‌سازی اصلی موتور.
- *
- * @see \Tavaan\Engine\Http\Routing\Contracts\RouterInterface
- */
-final class Router implements Contracts\RouterInterface
+final class Route
 {
-    /**
-     * @param Config $config پیکربندی موتور
-     */
     public function __construct(
-        private readonly Config $config,
-    ) {
+        public readonly string $method,
+        public readonly string $uri,
+        public readonly mixed $action,
+        public readonly string $name = '',
+        public array $middleware = [],
+        public ?array $where = null,
+    ) {}
+
+    public function name(string $name): self
+    {
+        return new self($this->method, $this->uri, $this->action, $name, $this->middleware, $this->where);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function get(/* ... */): mixed
+    public function middleware(array|string $mw): self
     {
-        // TODO: پیاده‌سازی get مطابق مستندات (سند §3 API).
+        return new self($this->method, $this->uri, $this->action, $this->name, array_merge($this->middleware, (array)$mw), $this->where);
+    }
+
+    public function where(string $param, string $pattern): self
+    {
+        $where = ($this->where ?? []) + [$param => $pattern];
+        return new self($this->method, $this->uri, $this->action, $this->name, $this->middleware, $where);
+    }
+}
+
+final class RouteCollection
+{
+    private array $routes = [];
+    private array $namedRoutes = [];
+
+    public function add(Route $route): void
+    {
+        $this->routes[] = $route;
+        if ($route->name !== '') $this->namedRoutes[$route->name] = $route;
+    }
+
+    public function match(string $method, string $uri): ?Route
+    {
+        foreach ($this->routes as $route) {
+            if ($this->matches($route, $method, $uri)) return $route;
+        }
         return null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function post(/* ... */): mixed
+    private function matches(Route $route, string $method, string $uri): bool
     {
-        // TODO: پیاده‌سازی post مطابق مستندات (سند §3 API).
-        return null;
+        if (strcasecmp($route->method, $method) !== 0 && $route->method !== 'ANY') return false;
+        $pattern = $this->compilePattern($route);
+        return (bool) preg_match($pattern, $uri);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function put(/* ... */): mixed
+    private function compilePattern(Route $route): string
     {
-        // TODO: پیاده‌سازی put مطابق مستندات (سند §3 API).
-        return null;
+        $pattern = $route->uri;
+        // Replace {param} with named capture groups
+        $pattern = preg_replace_callback('/\{(\w+)(\?)?\}/', function($m) use ($route) {
+            $name = $m[1];
+            $optional = $m[2] ?? '';
+            $constraint = $route->where[$name] ?? '[^/]+';
+            return "(?P<{$name}>{$constraint})" . ($optional ? '?' : '');
+        }, $pattern);
+        return '#^' . $pattern . '$#u';
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function patch(/* ... */): mixed
+    public function getRoute(string $name): ?Route
     {
-        // TODO: پیاده‌سازی patch مطابق مستندات (سند §3 API).
-        return null;
+        return $this->namedRoutes[$name] ?? null;
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function delete(/* ... */): mixed
+    public function all(): array { return $this->routes; }
+}
+
+final class UrlGenerator
+{
+    public function __construct(private readonly RouteCollection $routes) {}
+
+    public function route(string $name, array $params = []): ?string
     {
-        // TODO: پیاده‌سازی delete مطابق مستندات (سند §3 API).
-        return null;
+        $route = $this->routes->getRoute($name);
+        if ($route === null) return null;
+        $uri = $route->uri;
+        foreach ($params as $key => $value) {
+            $uri = str_replace('{' . $key . '}', (string)$value, $uri);
+            $uri = str_replace('{' . $key . '?}', (string)$value, $uri);
+        }
+        return $uri;
+    }
+}
+
+final class Router
+{
+    private RouteCollection $routes;
+    private ?UrlGenerator $generator = null;
+    private array $groupStack = [];
+
+    public function __construct()
+    {
+        $this->routes = new RouteCollection();
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function options(/* ... */): mixed
+    public function get(string $uri, mixed $action): Route
     {
-        // TODO: پیاده‌سازی options مطابق مستندات (سند §3 API).
-        return null;
+        return $this->addRoute('GET', $uri, $action);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function head(/* ... */): mixed
+    public function post(string $uri, mixed $action): Route
     {
-        // TODO: پیاده‌سازی head مطابق مستندات (سند §3 API).
-        return null;
+        return $this->addRoute('POST', $uri, $action);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function match(/* ... */): mixed
+    public function put(string $uri, mixed $action): Route
     {
-        // TODO: پیاده‌سازی match مطابق مستندات (سند §3 API).
-        return null;
+        return $this->addRoute('PUT', $uri, $action);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function any(/* ... */): mixed
+    public function patch(string $uri, mixed $action): Route
     {
-        // TODO: پیاده‌سازی any مطابق مستندات (سند §3 API).
-        return null;
+        return $this->addRoute('PATCH', $uri, $action);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function view(/* ... */): mixed
+    public function delete(string $uri, mixed $action): Route
     {
-        // TODO: پیاده‌سازی view مطابق مستندات (سند §3 API).
-        return null;
+        return $this->addRoute('DELETE', $uri, $action);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function redirect(/* ... */): mixed
+    public function any(string $uri, mixed $action): Route
     {
-        // TODO: پیاده‌سازی redirect مطابق مستندات (سند §3 API).
-        return null;
+        return $this->addRoute('ANY', $uri, $action);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function permanentRedirect(/* ... */): mixed
+    public function match(array $methods, string $uri, mixed $action): Route
     {
-        // TODO: پیاده‌سازی permanentRedirect مطابق مستندات (سند §3 API).
-        return null;
+        return $this->addRoute(implode('|', $methods), $uri, $action);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function resource(/* ... */): mixed
+    public function resource(string $name, string $controller): void
     {
-        // TODO: پیاده‌سازی resource مطابق مستندات (سند §3 API).
-        return null;
+        $this->get("/{$name}", [$controller, 'index'])->name("{$name}.index");
+        $this->get("/{$name}/create", [$controller, 'create'])->name("{$name}.create");
+        $this->post("/{$name}", [$controller, 'store'])->name("{$name}.store");
+        $this->get("/{$name}/{{$name}}", [$controller, 'show'])->name("{$name}.show");
+        $this->get("/{$name}/{{$name}}/edit", [$controller, 'edit'])->name("{$name}.edit");
+        $this->put("/{$name}/{{$name}}", [$controller, 'update'])->name("{$name}.update");
+        $this->delete("/{$name}/{{$name}}", [$controller, 'destroy'])->name("{$name}.destroy");
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function apiResource(/* ... */): mixed
+    public function apiResource(string $name, string $controller): void
     {
-        // TODO: پیاده‌سازی apiResource مطابق مستندات (سند §3 API).
-        return null;
+        $this->get("/{$name}", [$controller, 'index'])->name("{$name}.index");
+        $this->post("/{$name}", [$controller, 'store'])->name("{$name}.store");
+        $this->get("/{$name}/{{$name}}", [$controller, 'show'])->name("{$name}.show");
+        $this->put("/{$name}/{{$name}}", [$controller, 'update'])->name("{$name}.update");
+        $this->delete("/{$name}/{{$name}}", [$controller, 'destroy'])->name("{$name}.destroy");
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function group(/* ... */): mixed
+    public function group(array $attributes, callable $callback): void
     {
-        // TODO: پیاده‌سازی group مطابق مستندات (سند §3 API).
-        return null;
+        $this->groupStack[] = $attributes;
+        $callback($this);
+        array_pop($this->groupStack);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function prefix(/* ... */): mixed
+    public function dispatch(string $method, string $uri): mixed
     {
-        // TODO: پیاده‌سازی prefix مطابق مستندات (سند §3 API).
-        return null;
+        $route = $this->routes->match($method, $uri);
+        if ($route === null) return null;
+        // Extract params
+        $params = [];
+        $pattern = preg_replace_callback('/\{(\w+)(\?)?\}/', function($m) use (&$params, $route) {
+            return '(?P<' . $m[1] . '>[^/]+)';
+        }, $route->uri);
+        if (preg_match('#^' . $pattern . '$#u', $uri, $matches)) {
+            foreach ($matches as $k => $v) {
+                if (!is_int($k)) $params[$k] = $v;
+            }
+        }
+        return ['route' => $route, 'params' => $params];
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function middleware(/* ... */): mixed
+    public function getRoutes(): RouteCollection { return $this->routes; }
+
+    public function url(string $name, array $params = []): ?string
     {
-        // TODO: پیاده‌سازی middleware مطابق مستندات (سند §3 API).
-        return null;
+        if ($this->generator === null) $this->generator = new UrlGenerator($this->routes);
+        return $this->generator->route($name, $params);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function domain(/* ... */): mixed
+    private function addRoute(string $method, string $uri, mixed $action): Route
     {
-        // TODO: پیاده‌سازی domain مطابق مستندات (سند §3 API).
-        return null;
+        // Apply group prefix
+        $prefix = '';
+        $middleware = [];
+        foreach ($this->groupStack as $group) {
+            if (isset($group['prefix'])) $prefix .= '/' . trim($group['prefix'], '/');
+            if (isset($group['middleware'])) $middleware = array_merge($middleware, (array)$group['middleware']);
+        }
+        $fullUri = $prefix ? $prefix . $uri : $uri;
+        $route = new Route($method, $fullUri, $action, middleware: $middleware);
+        $this->routes->add($route);
+        return $route;
     }
+}
 
-    /**
-     * {@inheritdoc}
-     */
-    public function fallback(/* ... */): mixed
-    {
-        // TODO: پیاده‌سازی fallback مطابق مستندات (سند §3 API).
-        return null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function model(/* ... */): mixed
-    {
-        // TODO: پیاده‌سازی model مطابق مستندات (سند §3 API).
-        return null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function bind(/* ... */): mixed
-    {
-        // TODO: پیاده‌سازی bind مطابق مستندات (سند §3 API).
-        return null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function match(/* ... */): mixed
-    {
-        // TODO: پیاده‌سازی match مطابق مستندات (سند §3 API).
-        return null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function current(/* ... */): mixed
-    {
-        // TODO: پیاده‌سازی current مطابق مستندات (سند §3 API).
-        return null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function currentRouteName(/* ... */): mixed
-    {
-        // TODO: پیاده‌سازی currentRouteName مطابق مستندات (سند §3 API).
-        return null;
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    public function has(/* ... */): mixed
-    {
-        // TODO: پیاده‌سازی has مطابق مستندات (سند §3 API).
-        return null;
-    }
+final class RouterServiceProvider
+{
+    private ?Router $router = null;
+    public function __construct(private readonly array $config = []) {}
+    public function register(): void { $this->router = new Router(); }
+    public function boot(): void {}
+    public function provides(): array { return [Router::class, Route::class]; }
+    public function getRouter(): Router { if ($this->router === null) $this->register(); return $this->router; }
 }
