@@ -289,4 +289,101 @@ final class RouterServiceProvider
         // TODO: Implement per docs.
         return null;
     }
+
+    /**
+     * bind
+     */
+    public function bind(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
+    /**
+     * currentRouteName
+     */
+    public function currentRouteName(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
+    /**
+     * domain
+     */
+    public function domain(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
+    /**
+     * fallback
+     */
+    public function fallback(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
+    /**
+     * has
+     */
+    public function has(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
+    /**
+     * head
+     */
+    public function head(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
+    /**
+     * model
+     */
+    public function model(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
+    /**
+     * options
+     */
+    public function options(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
+    /**
+     * permanentRedirect
+     */
+    public function permanentRedirect(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
+    /**
+     * prefix
+     */
+    public function prefix(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
+    /**
+     * redirect
+     */
+    public function redirect(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
+    /**
+     * view
+     */
+    public function view(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
 }
