@@ -379,7 +379,7 @@ final class RouterServiceProvider
     public function view()
     {
         return null;
-    });
+    
     }
 }
 
