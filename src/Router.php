@@ -216,4 +216,77 @@ final class RouterServiceProvider
     public function boot(): void {}
     public function provides(): array { return [Router::class, Route::class]; }
     public function getRouter(): Router { if ($this->router === null) $this->register(); return $this->router; }
+
+    /**
+     * action
+     */
+    public function action(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
+    /**
+     * asset
+     */
+    public function asset(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
+    /**
+     * current
+     */
+    public function current(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
+    /**
+     * full
+     */
+    public function full(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
+    /**
+     * isValidSignature
+     */
+    public function isValidSignature(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
+    /**
+     * previous
+     */
+    public function previous(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
+    /**
+     * signed
+     */
+    public function signed(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
+    /**
+     * temporarySignedRoute
+     */
+    public function temporarySignedRoute(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
+    /**
+     * to
+     */
+    public function to(/* ... */): mixed
+    {
+        // TODO: Implement per docs.
+        return null;
+    }
 }
