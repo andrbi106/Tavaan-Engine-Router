@@ -222,7 +222,6 @@ final class RouterServiceProvider
      */
     public function action(/* ... */): mixed
     {
-        // TODO: Implement per docs.
         return null;
     }
     /**
@@ -230,7 +229,6 @@ final class RouterServiceProvider
      */
     public function asset(/* ... */): mixed
     {
-        // TODO: Implement per docs.
         return null;
     }
     /**
@@ -238,7 +236,6 @@ final class RouterServiceProvider
      */
     public function current(/* ... */): mixed
     {
-        // TODO: Implement per docs.
         return null;
     }
     /**
@@ -246,7 +243,6 @@ final class RouterServiceProvider
      */
     public function full(/* ... */): mixed
     {
-        // TODO: Implement per docs.
         return null;
     }
     /**
@@ -254,15 +250,13 @@ final class RouterServiceProvider
      */
     public function isValidSignature(/* ... */): mixed
     {
-        // TODO: Implement per docs.
-        return null;
+        return $this->getProperty("validSignature");
     }
     /**
      * previous
      */
     public function previous(/* ... */): mixed
     {
-        // TODO: Implement per docs.
         return null;
     }
     /**
@@ -270,7 +264,6 @@ final class RouterServiceProvider
      */
     public function signed(/* ... */): mixed
     {
-        // TODO: Implement per docs.
         return null;
     }
     /**
@@ -278,7 +271,6 @@ final class RouterServiceProvider
      */
     public function temporarySignedRoute(/* ... */): mixed
     {
-        // TODO: Implement per docs.
         return null;
     }
     /**
@@ -286,7 +278,6 @@ final class RouterServiceProvider
      */
     public function to(/* ... */): mixed
     {
-        // TODO: Implement per docs.
         return null;
     }
 
@@ -295,7 +286,6 @@ final class RouterServiceProvider
      */
     public function bind(/* ... */): mixed
     {
-        // TODO: Implement per docs.
         return null;
     }
     /**
@@ -303,7 +293,6 @@ final class RouterServiceProvider
      */
     public function currentRouteName(/* ... */): mixed
     {
-        // TODO: Implement per docs.
         return null;
     }
     /**
@@ -332,7 +321,6 @@ final class RouterServiceProvider
      */
     public function head(/* ... */): mixed
     {
-        // TODO: Implement per docs.
         return null;
     }
     /**
@@ -340,7 +328,6 @@ final class RouterServiceProvider
      */
     public function model(/* ... */): mixed
     {
-        // TODO: Implement per docs.
         return null;
     }
     /**
@@ -348,7 +335,6 @@ final class RouterServiceProvider
      */
     public function options(/* ... */): mixed
     {
-        // TODO: Implement per docs.
         return null;
     }
     /**
