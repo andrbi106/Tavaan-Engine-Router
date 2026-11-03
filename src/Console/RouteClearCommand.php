@@ -7,18 +7,18 @@ namespace Tavaan\Engine\Http\Routing\Console;
 use Tavaan\Core\Contracts\Console\CommandInterface;
 
 /**
- * route:list command.
+ * route:clear command.
  */
-final class Route_listCommand implements CommandInterface
+final class RouteClearCommand implements CommandInterface
 {
     public function name(): string
     {
-        return 'route:list';
+        return 'route:clear';
     }
 
     public function description(): string
     {
-        return 'Run route:list (TODO: fill description).';
+        return 'Run route:clear (TODO: fill description).';
     }
 
     public function handle(array $args = []): int

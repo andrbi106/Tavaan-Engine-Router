@@ -9,7 +9,7 @@ use Tavaan\Core\Contracts\Console\CommandInterface;
 /**
  * route:cache command.
  */
-final class Route_cacheCommand implements CommandInterface
+final class RouteCacheCommand implements CommandInterface
 {
     public function name(): string
     {
