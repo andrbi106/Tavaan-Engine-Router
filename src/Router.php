@@ -222,6 +222,7 @@ final class Router
     }
 }
 
+
 final class RouterServiceProvider
 {
     private ?Router $router = null;
@@ -368,10 +369,9 @@ final class RouterServiceProvider
     /**
      * redirect
      */
-    public function redirect()
+    public function redirect(string $to, int $status = 302): self
     {
-        return null;
-    });
+        return $this;
     }
     /**
      * view
@@ -382,3 +382,5 @@ final class RouterServiceProvider
     });
     }
 }
+
+
