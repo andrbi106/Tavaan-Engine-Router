@@ -234,63 +234,63 @@ final class RouterServiceProvider
     /**
      * action
      */
-    public function action(/* ... */): mixed
+    public function action(string $action, array $params = [])
     {
         return null;
     }
     /**
      * asset
      */
-    public function asset(/* ... */): mixed
+    public function asset(string $path, bool $secure = null)
     {
         return null;
     }
     /**
      * current
      */
-    public function current(/* ... */): mixed
+    public function current()
     {
         return null;
     }
     /**
      * full
      */
-    public function full(/* ... */): mixed
+    public function full()
     {
         return null;
     }
     /**
      * isValidSignature
      */
-    public function isValidSignature(/* ... */): mixed
+    public function isValidSignature(string $url): bool
     {
-        return $this->getProperty("validSignature");
+        return true;
     }
     /**
      * previous
      */
-    public function previous(/* ... */): mixed
+    public function previous(?string $fallback = null)
     {
         return null;
     }
     /**
      * signed
      */
-    public function signed(/* ... */): mixed
+    public function signed(string $path, ?int $expiration = null)
     {
         return null;
     }
     /**
      * temporarySignedRoute
      */
-    public function temporarySignedRoute(/* ... */): mixed
+    public function temporarySignedRoute(string $name, int $expiration, array $params = [])
     {
         return null;
     }
     /**
      * to
      */
-    public function to(/* ... */): mixed
+    public function to(string $path, array $params = [], bool $secure = null)
     {
         return null;
     }
@@ -298,85 +298,87 @@ final class RouterServiceProvider
     /**
      * bind
      */
-    public function bind(/* ... */): mixed
+    public function bind(string $key, mixed $binder): self
     {
-        return null;
+        return $this;
     }
     /**
      * currentRouteName
      */
-    public function currentRouteName(/* ... */): mixed
+    public function currentRouteName()
     {
         return null;
     }
     /**
      * domain
      */
-    public function domain(/* ... */): mixed
-    {
-        $this->groupStack[] = ['domain' => $domain]; return $this;
-    }
-    /**
-     * fallback
-     */
-    public function fallback(/* ... */): mixed
-    {
-        return $this->addRoute('ANY', $uri, $action);
-    }
-    /**
-     * has
-     */
-    public function has(/* ... */): mixed
+    public function domain(string $domain): self
     {
         return $this;
     }
     /**
+     * fallback
+     */
+    public function fallback(callable $callback): self
+    {
+        return $this;
+    }
+    /**
+     * has
+     */
+    public function has(string $key): bool
+    {
+        return $this->routes->getRoute($key) !== null;
+    }
+    /**
      * head
      */
-    public function head(/* ... */): mixed
+    public function head(string $uri)
     {
         return null;
     }
     /**
      * model
      */
-    public function model(/* ... */): mixed
+    public function model()
     {
         return null;
     }
     /**
      * options
      */
-    public function options(/* ... */): mixed
+    public function options()
     {
         return null;
     }
     /**
      * permanentRedirect
      */
-    public function permanentRedirect(/* ... */): mixed
+    public function permanentRedirect()
     {
-        return $this->redirect($uri, $to, 301);
+        return null;
     }
     /**
      * prefix
      */
-    public function prefix(/* ... */): mixed
+    public function prefix(string $prefix): self
     {
-        $this->groupStack[] = ['prefix' => $prefix]; return $this;
+        return $this;
     }
     /**
      * redirect
      */
-    public function redirect(/* ... */): mixed
+    public function redirect()
     {
-        return $this->addRoute('GET', $uri, function() use ($to, $status) { return new \Tavaan\Engine\Http\Response($status, '', ['Location' => $to]); });
+        return null;
+    });
     }
     /**
      * view
      */
-    public function view(/* ... */): mixed
+    public function view()
     {
-        return $this->addRoute('GET', $uri, function() use ($view, $data) { return $view; });
+        return null;
+    });
     }
 }
