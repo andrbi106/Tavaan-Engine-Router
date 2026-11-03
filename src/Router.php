@@ -192,6 +192,20 @@ final class Router
         return $this->generator->route($name, $params);
     }
 
+    private function extractParams(Route $route, string $uri): array
+    {
+        $params = [];
+        $pattern = preg_replace_callback('/\{(\w+)(\?)?\}/', function($m) use (&$params) {
+            return '(?P<' . $m[1] . '>[^/]+)';
+        }, $route->uri);
+        if (preg_match('#^' . $pattern . '$#u', $uri, $matches)) {
+            foreach ($matches as $k => $v) {
+                if (!is_int($k)) $params[$k] = $v;
+            }
+        }
+        return $params;
+    }
+
     private function addRoute(string $method, string $uri, mixed $action): Route
     {
         // Apply group prefix
