@@ -311,24 +311,21 @@ final class RouterServiceProvider
      */
     public function domain(/* ... */): mixed
     {
-        // TODO: Implement per docs.
-        return null;
+        \$this->groupStack[] = ['domain' => \$domain]; return \$this;
     }
     /**
      * fallback
      */
     public function fallback(/* ... */): mixed
     {
-        // TODO: Implement per docs.
-        return null;
+        return \$this->addRoute('ANY', \$uri, \$action);
     }
     /**
      * has
      */
     public function has(/* ... */): mixed
     {
-        // TODO: Implement per docs.
-        return null;
+        return \$this;
     }
     /**
      * head
@@ -359,31 +356,27 @@ final class RouterServiceProvider
      */
     public function permanentRedirect(/* ... */): mixed
     {
-        // TODO: Implement per docs.
-        return null;
+        return \$this->redirect(\$uri, \$to, 301);
     }
     /**
      * prefix
      */
     public function prefix(/* ... */): mixed
     {
-        // TODO: Implement per docs.
-        return null;
+        \$this->groupStack[] = ['prefix' => \$prefix]; return \$this;
     }
     /**
      * redirect
      */
     public function redirect(/* ... */): mixed
     {
-        // TODO: Implement per docs.
-        return null;
+        return \$this->addRoute('GET', \$uri, function() use (\$to, \$status) { return new \Tavaan\Engine\Http\Response(\$status, '', ['Location' => \$to]); });
     }
     /**
      * view
      */
     public function view(/* ... */): mixed
     {
-        // TODO: Implement per docs.
-        return null;
+        return \$this->addRoute('GET', \$uri, function() use (\$view, \$data) { return \$view; });
     }
 }
