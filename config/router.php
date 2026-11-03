@@ -2,41 +2,35 @@
 
 declare(strict_types=1);
 
-/*
- * پیکربندی موتور Router — DOC-040 §10
+/*|--------------------------------------------------------------------------
+ | Router Engine Configuration
+ |--------------------------------------------------------------------------
+ |
+ | پیکربندی موتور router — همهٔ کلیدهای مستندشده در `docs/03-engines/router.md` بخش «پیکربندی».
+ |
+ |@see https://github.com/Derogaramin/Tavaan-Doc/blob/main/docs/03-engines/router.md
  */
 
 return [
-    'files' => [
-        base_path('routes/web.php')   => ['middleware' => ['web']],
-        base_path('routes/api.php')   => ['middleware' => ['api'], 'prefix' => 'api'],
-        base_path('routes/admin.php') => ['middleware' => ['web'], 'prefix' => 'admin'],
+    /*| پیش‌فرض موتور (driver/store یا حالت فعال) */
+    'default' => env('ROUTER_DEFAULT', 'default'),
+
+    /*| کلید کش (در صورت استفاده) */
+    'prefix' => env('ROUTER_PREFIX', 'router:'),
+
+    /*| تنظیمات لاگ */
+    'log' => [
+        'channel' => env('ROUTER_LOG_CHANNEL', 'router'),
     ],
-    'cache' => [
-        'enabled' => env_bool('TVN_ROUTE_CACHE', false),
-        'file'    => storage_path('cache/routes.php'),
+
+    /*| Facade */
+    'facade' => [
+        'name' => 'Route',
+        'accessor' => 'router',
     ],
-    'matching' => [
-        'trailing_slash' => 'ignore',
-        'case_sensitive' => false,
-        'normalize'      => true,
-        'prefer_static'  => true,
-    ],
-    'model_binding' => [
-        'soft_deletes'   => false,
-        'enforce_policy' => true,
-        'scope_bindings' => true,
-    ],
-    'attributes' => [
-        'enabled' => false,
-        'paths'   => [base_path('app/src/Http/Controllers')],
-    ],
-    'fallback' => [
-        'enabled' => true,
-        'view'    => 'errors.404',
-    ],
-    'url' => [
-        'force_https' => env_bool('TVN_FORCE_HTTPS', false),
-        'asset_url'   => env_string('TVN_ASSET_URL', ''),
+
+    /*| سایر کلیدها (طبق مستندات) */
+    'options' => [
+        // TODO: کلیدهای اضافی طبق سند §۶ (پیکربندی)
     ],
 ];
