@@ -311,21 +311,21 @@ final class RouterServiceProvider
      */
     public function domain(/* ... */): mixed
     {
-        \$this->groupStack[] = ['domain' => \$domain]; return \$this;
+        $this->groupStack[] = ['domain' => $domain]; return $this;
     }
     /**
      * fallback
      */
     public function fallback(/* ... */): mixed
     {
-        return \$this->addRoute('ANY', \$uri, \$action);
+        return $this->addRoute('ANY', $uri, $action);
     }
     /**
      * has
      */
     public function has(/* ... */): mixed
     {
-        return \$this;
+        return $this;
     }
     /**
      * head
@@ -356,27 +356,27 @@ final class RouterServiceProvider
      */
     public function permanentRedirect(/* ... */): mixed
     {
-        return \$this->redirect(\$uri, \$to, 301);
+        return $this->redirect($uri, $to, 301);
     }
     /**
      * prefix
      */
     public function prefix(/* ... */): mixed
     {
-        \$this->groupStack[] = ['prefix' => \$prefix]; return \$this;
+        $this->groupStack[] = ['prefix' => $prefix]; return $this;
     }
     /**
      * redirect
      */
     public function redirect(/* ... */): mixed
     {
-        return \$this->addRoute('GET', \$uri, function() use (\$to, \$status) { return new \Tavaan\Engine\Http\Response(\$status, '', ['Location' => \$to]); });
+        return $this->addRoute('GET', $uri, function() use ($to, $status) { return new \Tavaan\Engine\Http\Response($status, '', ['Location' => $to]); });
     }
     /**
      * view
      */
     public function view(/* ... */): mixed
     {
-        return \$this->addRoute('GET', \$uri, function() use (\$view, \$data) { return \$view; });
+        return $this->addRoute('GET', $uri, function() use ($view, $data) { return $view; });
     }
 }
