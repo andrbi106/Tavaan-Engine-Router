@@ -37,5 +37,6 @@
     "accessor": "router"
   },
   "docs": "docs/03-engines/router.md",
-  "notes": "کد در engines/http/src/Routing (namespace مطابق DOC-040 machine block)."
+  "notes": "کد در engines/http/src/Routing (namespace مطابق DOC-040 machine block).",
+  "class": "Tavaan\\Engine\\Http\\Routing\\RouterEngine"
 }
